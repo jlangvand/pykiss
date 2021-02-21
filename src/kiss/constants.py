@@ -1,4 +1,4 @@
-# Copyright (C) 2021  Orbit NTNU
+# pykiss Copyright © 2021  Orbit NTNU
 
 # Authors:
 # David Ferenc Bendiksen

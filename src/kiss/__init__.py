@@ -42,10 +42,8 @@ class Kiss:
     Defines new KISS interface.
     """
 
-    def __init__(self, interface: Serial):
-        self._interface = interface
-        self._incoming_data = []
-        self._incomplete_frame = b'', b''
+    def __init__(self, interface: Serial, baud: int = 115200):
+        self._interface = Serial(port=interface, baudrate=baud, timeout=0.1)
 
     def read_frame(self) -> (bytes, bytes):
         """

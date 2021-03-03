@@ -23,7 +23,7 @@
 Constants used in the Kiss class
 """
 
-FEND = b'\xC0'  # Flush buffer
+FEND = b'\xC0'  # Frame end, also used at beginning of frame to flush buffer
 FESC = b'\xDB'  # Escape bytes
 TFEND = b'\xDC'  # Transposed FEND (FESC TFEND)
 TFESC = b'\xDD'  # Transposed FESC (FESC TFESC)

@@ -42,8 +42,8 @@ class Kiss:
     Defines new KISS interface.
     """
 
-    def __init__(self, interface: Serial, baud: int = 115200):
-        self._interface = Serial(port=interface, baudrate=baud, timeout=0.1)
+    def __init__(self, port: str, baud: int = 115200, timeout: int = 0.1):
+        self._interface = Serial(port=port, baudrate=baud, timeout=timeout)
 
     def read_frame(self) -> (bytes, bytes):
         """
@@ -61,7 +61,9 @@ class Kiss:
 
             if _byte == CONST.FEND:
                 break
-            if _escape:
+            if _byte == CONST.FESC:
+                _escape = True
+            elif _escape:
                 if _byte == CONST.TFEND:
                     _bytes += CONST.FEND
                 elif _byte == CONST.TFESC:
@@ -71,9 +73,11 @@ class Kiss:
                 _bytes += _byte
 
         if len(_bytes) > 0:
-            _type = _bytes[0]
-        if len(_bytes) > 1:
-            _payload = _bytes[1:]
+            _type = _bytes[:1]
+            if len(_bytes) > 1:
+                _payload = _bytes[1:]
+        elif self.has_data():
+            _type, _payload = self.read_frame()
 
         return _type, _payload
 
@@ -81,17 +85,26 @@ class Kiss:
         """
         Write a frame to the interface.
         """
-        _bytes = head  # TODO: Check if head is FEND or FESC
+        i = 0
+        n = 0
 
-        for _b in payload:
+        n += self._interface.write(CONST.FEND)
+        n += self._interface.write(head)
+        
+        while i < len(payload):
+            _b = payload[i:i+1]
             if _b == CONST.FEND:
-                _bytes += CONST.FESC + CONST.TFEND
+                n += self._interface.write(CONST.FESC)
+                n += self._interface.write(CONST.TFEND)
             elif _b == CONST.FESC:
-                _bytes += CONST.FESC + CONST.TFESC
+                n += self._interface.write(CONST.FESC)
+                n += self._interface.write(CONST.TFESC)
             else:
-                _bytes += _b
+                n += self._interface.write(_b)
+            i += 1
 
-        return self._interface.write(_bytes)
+        n += self._interface.write(CONST.FEND)
+        return n
 
     def has_data(self) -> int:
         """

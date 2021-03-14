@@ -56,9 +56,11 @@ class Kiss:
         _payload: bytes = b''
         _escape = False
 
-        while self._interface.in_waiting:
+        while True:
             _byte = self._interface.read()
 
+            if _byte is None:
+                break
             if _byte == CONST.FEND:
                 break
             if _byte == CONST.FESC:
